@@ -34,12 +34,12 @@ import {
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 
 function SignIn (props) {
-
-
-
     const [email, setEmail] = useState('');
     const [email_error, setEmailError] = useState(false);
     const [email_error_text, setEmailErrorText] = useState('');
+
+    const [email_error2, setEmailError2] = useState(false);
+    const [email_error_text2, setEmailErrorText2] = useState('');
 
     const [password, setPassword] = useState('');
     const [password_error, setPasswordError] = useState(false);
@@ -56,6 +56,121 @@ function SignIn (props) {
     const context = useContext(AuthContext);
 
 
+    const register = async () => {
+        let new_phone = phone.replace(/\D/g, '');
+
+        if (email.length == 0 || new_phone.length ==  0 || password.length == 0) {
+                if (email.length == 0) {
+                    setEmailError(true)
+                    setEmailErrorText('Поле обязательно')
+                } else {
+                    setEmailError(false)
+                    setEmailErrorText('')
+                }
+                if (new_phone.length == 0) {
+                    setPhoneError(true)
+                    setPhoneErrorText('Поле обязательно')
+                } else {
+                    setPhoneError(false)
+                    setPhoneErrorText('')
+                }
+                if (password.length == 0) {
+                    setPasswordError(true)
+                    setPasswordErrorText('Поле обязательно')
+                } else {
+                    setPasswordError(false)
+                    setPasswordErrorText('')
+                }
+        } else {
+            setEmailError(false)
+            setEmailErrorText('')
+            setPhoneError(false)
+            setPhoneErrorText('')
+            setPasswordError(false)
+            setPasswordErrorText('')
+
+            try {
+                fetch(`https://sweetskills.cc/api/reg`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        phone: new_phone,
+                        password: password,
+                    })
+
+                }).then((response) => {
+                    return response.json()
+                }).then((response) => {
+                    if (response.hasOwnProperty('status')) {
+                        if (response.status == 'exist') {
+                                setEmailError2(true)
+                                setEmailErrorText2('Учётная запись с такой электронной почтой уже существует')
+
+                        } else if (response.status == 'ok') {
+
+                            let foundUser = {
+                                token: response.token,
+                                user_id: response.user_id,
+                            }
+
+                            context.signIn(foundUser, () => {
+                                props.navigation.navigate('RecommendationsScreen')
+
+                            }).then(r => console.log("success"));
+                            setEmailError2(false)
+                            setEmailErrorText2('')
+                        }
+                    }
+
+                    console.log(response, 'register')
+
+                })
+            } catch (e) {
+                console.log(e)
+            }
+        }
+
+
+
+    }
+
+
+    const phoneValidation = (val) => {
+
+        let x = val
+            .replace(/\D/g, '')
+            .match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
+        let myPhone = !x[2]
+            ? '+7 ' + (x[1] != '7' ? x[1] : '')
+            : !x[3]
+                ? '+7 (' + x[2]
+                : '+7 (' +
+                x[2] +
+                ') ' +
+                (x[3] ? x[3] : '') +
+                (x[4] ? ' - ' + x[4] : '') +
+                (x[5] ? ' - ' + x[5] : '');
+
+        const isValid = validatePhoneNumber(myPhone);
+        // setPhoneButtonDisable(isValid)
+
+        setPhone(myPhone);
+    }
+
+    function validatePhoneNumber(phoneNumber) {
+        let regex = /^((\7|7|8)+([0-9]){10})$/;
+        let new_phone = phoneNumber.replace(/\D/g, '');
+        return regex.test(new_phone);
+
+    }
+
+
+
+
     const redirectToSignInScreen = () => {
         props.navigation.navigate('SignInScreen')
     }
@@ -64,9 +179,12 @@ function SignIn (props) {
         <SafeAreaView style={[styles.container]}>
             <View style={styles.sign_up_header}>
                 <Text style={styles.sign_up_header_title}>Создать учетную запись</Text>
-                {sign_up_header_info_exist &&
-                <Text style={styles.sign_up_header_info}>Пожалуйста, заполните поля
-                    для регистрации</Text>
+
+                {email_error2 ?
+                  <Text style={{color: '#DD5353', fontSize: 13, fontWeight: '500', textAlign: 'center'}}>{email_error_text2}</Text>
+                    :
+                    <Text style={styles.sign_up_header_info}>Пожалуйста, заполните поля
+                        для регистрации</Text>
                 }
 
             </View>
@@ -76,24 +194,37 @@ function SignIn (props) {
                 <View style={styles.sign_up_wrapper_input_title_wrapper}>
                     <Text style={[styles.sign_up_wrapper_input_title]}>Введите ваш адрес электронный почты</Text>
                     <TextInput
-                        style={[styles.sign_up_wrapper_input_field, {borderBottomColor: email_error ? '#DD5353' : '#1C1D1E'}]}
+                        style={[styles.sign_up_wrapper_input_field, {borderBottomColor: email_error2 ? '#DD5353' : '#1C1D1E'}]}
                         onChangeText={(val) => setEmail(val)}
                         value={email}
                         placeholder='youremail@gmail.com'
                         placeholderTextColor='#1C1D1E'
                     />
 
+                    {email_error &&
+                      <Text style={{color: '#DD5353', fontSize: 13, fontWeight: '500',paddingTop: 10 }}>{email_error_text}</Text>
+                    }
+
+
                 </View>
                 <View style={styles.sign_up_wrapper_input_title_wrapper}>
                     <Text style={[styles.sign_up_wrapper_input_title]}>Введите ваш номер телефона</Text>
                     <TextInput
-                        style={[styles.sign_up_wrapper_input_field, {borderBottomColor: '#1C1D1E'}]}
-                        onChangeText={(val) => setPhone(val)}
+                        style={[styles.sign_up_wrapper_input_field, {borderBottomColor:  '#1C1D1E'}]}
+                        // onChangeText={(val) => setPhone(val)}
+                        onChangeText={(val) => {
+                            phoneValidation(val)
+                        }}
                         value={phone}
                         placeholder='+7 999 999 99 99'
                         placeholderTextColor='#1C1D1E'
                         keyboardType={'phone-pad'}
                     />
+
+                    {phone_error &&
+                    <Text style={{color: '#DD5353', fontSize: 13, fontWeight: '500',paddingTop: 10 }}>{phone_error_text}</Text>
+                    }
+
 
                 </View>
                 <View style={styles.sign_up_wrapper_input_title_wrapper}>
@@ -107,6 +238,10 @@ function SignIn (props) {
                         secureTextEntry={password_security}
 
                     />
+
+                    {password_error &&
+                         <Text style={{color: '#DD5353', fontSize: 13, fontWeight: '500', paddingTop: 10}}>{password_error_text}</Text>
+                    }
 
                     {password_security &&
                     <TouchableOpacity style={{position: 'absolute', zIndex: 9, right: 0, top: 30}}
@@ -132,7 +267,7 @@ function SignIn (props) {
 
                 </View>
 
-                <TouchableOpacity style={styles.sign_up_create_new_account_btn}>
+                <TouchableOpacity style={styles.sign_up_create_new_account_btn} onPress={() => register()}>
                     <Text style={styles.sign_up_create_new_account_btn_text}>Создать учетную запись</Text>
                 </TouchableOpacity>
 

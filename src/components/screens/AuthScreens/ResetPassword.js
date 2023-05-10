@@ -6,6 +6,7 @@ import { useColorScheme } from 'react-native';
 import {AuthContext} from "../../AuthContext/context";
 import { useContext } from 'react';
 import BackIcon from '../../../../assets/svg/backIcon';
+import BackIcon2 from '../../../../assets/svg/backIcon2';
 
 
 
@@ -42,13 +43,65 @@ function SignIn (props) {
     const [email_error_text, setEmailErrorText] = useState('');
 
 
+    const [email_error2, setEmailError2] = useState(false);
+    const [email_error_text2, setEmailErrorText2] = useState('');
+
+
     const [reset_password_header_info_exist, setSignInHeaderInfoExist] = useState(true);
 
     const [reset_password_success_popup, setResetPasswordSuccessPopup] = useState(false);
 
-
-
     const context = useContext(AuthContext);
+
+
+
+    const resetPassword = async () => {
+            if (email.length == 0) {
+                setEmailError(true)
+                setEmailErrorText('Поле обязательно')
+            } else {
+                setEmailError(false)
+                setEmailErrorText('')
+
+            try {
+                fetch(`https://sweetskills.cc/api/reset`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                    })
+
+                }).then((response) => {
+                    return response.json()
+                }).then((response) => {
+
+                    console.log(response, 'reset password')
+
+                    if (response.hasOwnProperty('status')) {
+                        if (response.status == "not exist") {
+                            setEmailError2(true)
+                            setEmailErrorText2('Учётная запись с такой электронной почтой не существует')
+                        } else if (response.status == 'ok') {
+                            setEmailError2(false)
+                            setEmailErrorText2('')
+                            setResetPasswordSuccessPopup(true)
+                        }
+                    }
+
+
+                })
+            } catch (e) {
+                console.log(e)
+            }
+        }
+
+
+
+    }
+
 
 
     const redirectToSignInScreen = () => {
@@ -59,13 +112,15 @@ function SignIn (props) {
         <SafeAreaView style={[styles.container]}>
             <View style={styles.reset_password_header}>
                 <TouchableOpacity style={styles.back_btn} onPress={() => redirectToSignInScreen()}>
-                    <BackIcon/>
+                    <BackIcon2/>
                 </TouchableOpacity>
                 <Text style={styles.reset_password_header_title}>Сбросить пароль</Text>
-                {reset_password_header_info_exist &&
-                <Text style={styles.reset_password_header_info}>
-                    Введите адрес электронной почты, привязанный к вашей и учётной записи, и мы отправим вам временный пароль.
-                </Text>
+                {email_error2 ?
+                    <Text style={{color: '#DD5353', fontSize: 13, fontWeight: '500', textAlign: 'center' }}>{email_error_text2}</Text>
+                    :
+                    <Text style={styles.reset_password_header_info}>
+                        Введите адрес электронной почты, привязанный к вашей и учётной записи, и мы отправим вам временный пароль.
+                    </Text>
                 }
 
             </View>
@@ -75,12 +130,16 @@ function SignIn (props) {
                 <View style={styles.reset_password_wrapper_input_title_wrapper}>
                     <Text style={[styles.reset_password_wrapper_input_title]}>Введите ваш адрес электронный почты</Text>
                     <TextInput
-                        style={[styles.reset_password_wrapper_input_field, {borderBottomColor: email_error ? '#DD5353' : '#1C1D1E'}]}
+                        style={[styles.reset_password_wrapper_input_field, {borderBottomColor: email_error2 ? '#DD5353' : '#1C1D1E'}]}
                         onChangeText={(val) => setEmail(val)}
                         value={email}
                         placeholder='youremail@gmail.com'
                         placeholderTextColor='#1C1D1E'
                     />
+
+                    {email_error &&
+                         <Text style={{color: '#DD5353', fontSize: 13, fontWeight: '500',paddingTop: 10 }}>{email_error_text}</Text>
+                    }
 
                 </View>
 
@@ -88,7 +147,7 @@ function SignIn (props) {
 
             <View style={styles.reset_password_footer}>
 
-                <TouchableOpacity style={styles.reset_password_send_email_btn} onPress={() => setResetPasswordSuccessPopup(true)}>
+                <TouchableOpacity style={styles.reset_password_send_email_btn} onPress={() => resetPassword()}>
                     <Text style={styles.reset_password_send_email_btn_text}>Отправить</Text>
                 </TouchableOpacity>
             </View>
@@ -134,7 +193,7 @@ const styles = StyleSheet.create({
     reset_password_header: {
         width: '100%',
         marginBottom: 48,
-        paddingHorizontal: 15,
+        paddingHorizontal: 16,
     },
     reset_password_header_title: {
         color: '#1C1D1E',
@@ -150,7 +209,7 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         fontSize: 13,
         color: '#333435',
-        width: '90%',
+        width: '85%',
         textAlign: 'center',
         justifyContent: 'center',
         alignItems: 'center',
@@ -162,7 +221,7 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         flex: 1,
-        paddingHorizontal: 15,
+        paddingHorizontal: 16,
         marginBottom: 30
     },
 
@@ -174,6 +233,7 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: '500',
         color: '#6B7683',
+        // paddingHorizontal: 3
     },
     reset_password_wrapper_input_field: {
         width: '100%',
@@ -214,6 +274,7 @@ const styles = StyleSheet.create({
     back_btn: {
         width: '100%',
         marginBottom: 12,
+        // backgroundColor: 'red'
 
     },
     reset_password_success_popup_main_wrapper: {

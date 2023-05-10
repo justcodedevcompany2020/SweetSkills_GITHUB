@@ -11,6 +11,13 @@ import SplashScreen from "react-native-splash-screen";
 import SignInScreen from '../components/screens/AuthScreens/SignIn';
 import SignUpScreen from '../components/screens/AuthScreens/SignUp';
 import ResetPasswordScreen from '../components/screens/AuthScreens/ResetPassword';
+import RecommendationsScreen from '../components/screens/MainScreens/Recommendations';
+import MyTrainingScreen from '../components/screens/MainScreens/MyTraining';
+import CoursesScreen from '../components/screens/MainScreens/Courses';
+import ViewGuideSinglePageScreen from '../components/screens/MainScreens/ViewGuideSinglePage';
+import NewsLineScreen from '../components/screens/MainScreens/NewsLine';
+import AccountScreen from '../components/screens/MainScreens/Account';
+import ChangePasswordScreen from '../components/screens/MainScreens/ChangePassword';
 
 
 
@@ -21,7 +28,7 @@ const Stack = createStackNavigator();
 
 
 const RootNavigator = () => {
-
+    // AsyncStorage.clear()
     const [isLoading, setIsLoading] = React.useState(true);
     const [userToken, setUserToken] = React.useState(null);
 
@@ -67,14 +74,13 @@ const RootNavigator = () => {
         signIn: async (foundUser, callback) => {
             setIsLoading(true);
             const userToken = String(foundUser.token);
-            // const user_data = foundUser.user_data;
+            const user_id = String(foundUser.user_id);
 
             // setUserToken(userToken);
 
             try {
                 await AsyncStorage.setItem('userToken', userToken);
-                // await AsyncStorage.setItem('user_data', JSON.stringify(user_data));
-                // await AsyncStorage.setItem('userId', userId);
+                await AsyncStorage.setItem('userId', user_id);
             } catch (e) {
                 console.log(e);
             }
@@ -131,50 +137,139 @@ const RootNavigator = () => {
 
     return (
         <AuthContext.Provider value={authContext}>
-        <NavigationContainer>
+            <NavigationContainer>
+
+                {loginState.userToken !== null ?
+                    (
+                    <Stack.Navigator
+                        initialRouteName='RecommendationsScreen'
+                        screenOptions={{
+                            headerShown: false,
+                            animationEnabled: true,
+                            detachPreviousScreen: true,
+                            presentation: 'transparentModal'
+                        }}
+                    >
 
 
-                <Stack.Navigator
-                    initialRouteName='SignInScreen'
-                    screenOptions={{
-                        headerShown: false,
-                        animationEnabled: true,
-                        detachPreviousScreen: true,
-                        presentation: 'transparentModal'
-                    }}
-                >
 
-                <Stack.Screen
-                    name="SignInScreen"
-                    component={SignInScreen}
-                    options={({route}) => ({
-                        tabBarButton: () => null,
-                        tabBarStyle: {display: 'none'},
-                    })}
-                />
+                        <Stack.Screen
+                            name="RecommendationsScreen"
+                            component={RecommendationsScreen}
+                            options={({route}) => ({
+                                tabBarButton: () => null,
+                                tabBarStyle: {display: 'none'},
+                            })}
+                        />
 
-                    <Stack.Screen
-                        name="SignUpScreen"
-                        component={SignUpScreen}
-                        options={({route}) => ({
-                            tabBarButton: () => null,
-                            tabBarStyle: {display: 'none'},
-                        })}
-                    />
+                        <Stack.Screen
+                            name="MyTrainingScreen"
+                            component={MyTrainingScreen}
+                            options={({route}) => ({
+                                tabBarButton: () => null,
+                                tabBarStyle: {display: 'none'},
+                            })}
+                        />
 
-                    <Stack.Screen
-                        name="ResetPasswordScreen"
-                        component={ResetPasswordScreen}
-                        options={({route}) => ({
-                            tabBarButton: () => null,
-                            tabBarStyle: {display: 'none'},
-                        })}
-                    />
+                        <Stack.Screen
+                            name="CoursesScreen"
+                            component={CoursesScreen}
+                            options={({route}) => ({
+                                tabBarButton: () => null,
+                                tabBarStyle: {display: 'none'},
+                            })}
+                        />
+
+                        <Stack.Screen
+                            name="ViewGuideSinglePageScreen"
+                            component={ViewGuideSinglePageScreen}
+                            options={({route}) => ({
+                                tabBarButton: () => null,
+                                tabBarStyle: {display: 'none'},
+                            })}
+                        />
+
+                        <Stack.Screen
+                            name="NewsLineScreen"
+                            component={NewsLineScreen}
+                            options={({route}) => ({
+                                tabBarButton: () => null,
+                                tabBarStyle: {display: 'none'},
+                            })}
+                        />
 
 
-             </Stack.Navigator>
+                        <Stack.Screen
+                            name="AccountScreen"
+                            component={AccountScreen}
+                            options={({route}) => ({
+                                tabBarButton: () => null,
+                                tabBarStyle: {display: 'none'},
+                            })}
+                        />
+                        <Stack.Screen
+                            name="ChangePasswordScreen"
+                            component={ChangePasswordScreen}
+                            options={({route}) => ({
+                                tabBarButton: () => null,
+                                tabBarStyle: {display: 'none'},
+                            })}
+                        />
+
+
+
+
+                    </Stack.Navigator>
+
+
+                    )
+
+                    :
+
+                    <Stack.Navigator
+                        initialRouteName='SignInScreen'
+                        screenOptions={{
+                            headerShown: false,
+                            animationEnabled: true,
+                            detachPreviousScreen: true,
+                            presentation: 'transparentModal'
+                        }}
+                    >
+
+                        <Stack.Screen
+                            name="SignInScreen"
+                            component={SignInScreen}
+                            options={({route}) => ({
+                                tabBarButton: () => null,
+                                tabBarStyle: {display: 'none'},
+                            })}
+                        />
+
+                        <Stack.Screen
+                            name="SignUpScreen"
+                            component={SignUpScreen}
+                            options={({route}) => ({
+                                tabBarButton: () => null,
+                                tabBarStyle: {display: 'none'},
+                            })}
+                        />
+
+                        <Stack.Screen
+                            name="ResetPasswordScreen"
+                            component={ResetPasswordScreen}
+                            options={({route}) => ({
+                                tabBarButton: () => null,
+                                tabBarStyle: {display: 'none'},
+                            })}
+                        />
+
+                    </Stack.Navigator>
+
+
+                }
 
             </NavigationContainer>
+
 
         </AuthContext.Provider>
         );
