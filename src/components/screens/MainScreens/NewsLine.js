@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useRef, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import Svg, { Mask, Path, Rect, Circle, Defs, Stop, ClipPath, G } from "react-native-svg";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useColorScheme } from 'react-native';
@@ -7,9 +7,8 @@ import {AuthContext} from "../../AuthContext/context";
 import { useContext } from 'react';
 import Footer from '../../includes/Footer';
 import ReadMore from '@fawazahmed/react-native-read-more'
-
-
 import BackCoursesIcon from  '../../../../assets/svg/backCoursesIcon';
+import moment from "moment";
 
 
 import {
@@ -24,7 +23,8 @@ import {
     ActivityIndicator,
     ImageBackground,
     ScrollView,
-    Platform
+    Platform,
+    FlatList
 } from 'react-native';
 
 import {
@@ -35,45 +35,127 @@ import {
     initialWindowMetrics,
 } from 'react-native-safe-area-context';
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
+import {get} from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
 function NewsLine (props) {
 
-
-
-
-
-
     const context = useContext(AuthContext);
 
-    const news_line = [
-        {
 
-            img: require('../../../../assets/images/news_line_img.png'),
-            name: 'administrator',
-            avatar: require('../../../../assets/images/avatar_img.png'),
-            title: 'Макаронс "Сердечки"',
-            info: 'Небольшое и лёгкое печенье-безе с мягкой начинкой и суховатой хрустящей корочкой; оно круглой формы и состоит из двух.',
-            date: '23 апреля 2023',
-        },
-        {
 
-            // img: require('../../../../assets/images/news_line_img.png'),
-            name: 'administrator',
-            avatar: require('../../../../assets/images/avatar_img.png'),
-            title: 'Макаронс "Сердечки"',
-            info: 'Небольшое и лёгкое печенье-безе с мягкой начинкой и суховатой хрустящей корочкой; оно круглой формы и состоит из двух.',
-            date: '23 апреля 2023',
-        },
+    const [news_list, setNewsList] = useState([]);
+    const [current_page, setCurrentPage] = useState(1);
+    const [last_page, setLastPage] = useState(1);
+    const [loading_news, setLoadingNews] = useState(false);
+
+
+    useEffect(() => {
+
+        const unsubscribe = props.navigation.addListener('focus', () => {
+                getNews()
+        });
+
+        return unsubscribe;
+    }, [props.navigation])
 
 
 
+    const getNews = async () => {
+        let userToken = await AsyncStorage.getItem('userToken');
 
-    ];
+        console.log(userToken);
+        let myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+
+        let raw = JSON.stringify({
+            token: userToken,
+            page: current_page
+        });
+
+        let requestOptions = {
+            method: 'POST',
+            headers: myHeaders,
+            body: raw,
+            redirect: 'follow'
+        };
+
+        fetch("https://sweetskills.cc/api/news", requestOptions)
+            .then(response => response.json())
+            .then(result => {
+                console.log(typeof result, 'news')
+                if (result.hasOwnProperty('status')) {
+                    if (result.status == 'ok') {
+                        setNewsList(result.news)
+                        setLastPage(result.pages)
+                    }
+                }
+            })
+            .catch(error => console.log('error', error));
+    }
+    const loadMoreNews = async () => {
+
+        console.log(current_page,current_page == last_page, 'pageeeeeeeeeeeeeeeee');
+
+        if (current_page == last_page) {
+            return false;
+        }
+     let userToken = await AsyncStorage.getItem('userToken');
+
+        setLoadingNews(true)
+        console.log(userToken);
+        let myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+
+        let new_page = current_page + 1;
 
 
+        let raw = JSON.stringify({
+            token: userToken,
+            page: new_page
+        });
 
-    const redirectToTrainingScreen = () => {
-        props.navigation.navigate('MyTrainingScreen')
+        let requestOptions = {
+            method: 'POST',
+            headers: myHeaders,
+            body: raw,
+            redirect: 'follow'
+        };
+
+        fetch("https://sweetskills.cc/api/news", requestOptions)
+            .then(response => response.json())
+            .then(result => {
+                setLoadingNews(false)
+
+
+                if (result.hasOwnProperty('status')) {
+                    if (result.status == 'ok') {
+
+                        setCurrentPage(new_page)
+                        let more_news = result.news;
+
+                        more_news.forEach(function(item){
+                            news_list.push(item)
+                        })
+                        console.log(more_news, 'more_news')
+
+                    }
+                }
+            })
+            .catch(error => console.log('error', error));
+    }
+    // const moment = require('moment');
+
+
+    const getTime =  (date) => {
+         let timestamp = date;
+         timestamp = timestamp.substring(0, 10);
+         date = new Date(timestamp);
+
+         let options = { day: 'numeric', month: 'long', year: 'numeric' };
+         let formattedDate = date.toLocaleDateString('ru-RU', options);
+
+         console.log(formattedDate);
+         return formattedDate;
     }
 
 
@@ -85,37 +167,90 @@ function NewsLine (props) {
             </View>
 
 
-            <ScrollView style={styles.news_line_wrapper}>
+            <View style={styles.news_line_wrapper}>
                 <View style={styles.news_line_wrapper_child_items_list_wrapper}>
-                    {news_line.map((item, index) => {
-                        return(
+                    {/*{news_list.length > 0 && news_list.map((item, index) => {*/}
+                    {/*    console.log(item, 'item');*/}
+                    {/*    return(*/}
+                    {/*        <TouchableOpacity key={index} style={styles.news_line_child_items_list_item}>*/}
+                    {/*            <View style={styles.news_line_child_items_list_item_avatar_name_wrapper}>*/}
+                    {/*                <View style={styles.news_line_child_items_list_item_avatar}>*/}
+                    {/*                    <Image source={{uri: item?.avatar}} style={styles.news_line_child_items_list_item_avatar_child} />*/}
+                    {/*                </View>*/}
+                    {/*                <Text style={styles.news_line_child_items_list_item_name}>{item?.publisher}</Text>*/}
+                    {/*            </View>*/}
+                    {/*            {item.img &&*/}
+                    {/*            <View style={styles.news_line_child_items_list_item_img}>*/}
+                    {/*                <Image source={{uri: item?.img}} style={styles.news_line_child_items_list_item_img_child}/>*/}
+                    {/*            </View>*/}
+                    {/*            }*/}
+
+                    {/*            <View style={styles.news_line_child_items_list_item_info_box}>*/}
+                    {/*                <Text style={styles.news_line_child_items_list_item_avatar_info_title}>{item?.title}</Text>*/}
+                    {/*                <Text style={styles.news_line_child_items_list_item_avatar_info_text}>{item?.text}</Text>*/}
+                    {/*                /!*<Text style={styles.news_line_child_items_list_item_avatar_info_date_text}>{item.date}</Text>*!/*/}
+                    {/*            </View>*/}
+
+
+                    {/*        </TouchableOpacity>*/}
+                    {/*    )*/}
+
+                    {/*})}*/}
+
+                    <FlatList
+                        data={news_list}
+                        renderItem={({item}, index) => (
                             <TouchableOpacity key={index} style={styles.news_line_child_items_list_item}>
                                 <View style={styles.news_line_child_items_list_item_avatar_name_wrapper}>
                                     <View style={styles.news_line_child_items_list_item_avatar}>
-                                        <Image source={item.avatar} style={styles.news_line_child_items_list_item_avatar_child} />
+                                        <Image source={{uri: item?.avatar}} style={styles.news_line_child_items_list_item_avatar_child} />
                                     </View>
-                                    <Text style={styles.news_line_child_items_list_item_name}>{item.name}</Text>
+                                    <Text style={styles.news_line_child_items_list_item_name}>{item?.publisher}</Text>
                                 </View>
                                 {item.img &&
-                                    <View style={styles.news_line_child_items_list_item_img}>
-                                        <Image source={item.img} style={styles.news_line_child_items_list_item_img_child}/>
-                                    </View>
+                                <View style={styles.news_line_child_items_list_item_img}>
+                                    <Image source={{uri: item?.img}} style={styles.news_line_child_items_list_item_img_child}/>
+                                </View>
                                 }
 
                                 <View style={styles.news_line_child_items_list_item_info_box}>
-                                    <Text style={styles.news_line_child_items_list_item_avatar_info_title}>{item.title}</Text>
-                                    <Text style={styles.news_line_child_items_list_item_avatar_info_text}>{item.info}</Text>
-                                    <Text style={styles.news_line_child_items_list_item_avatar_info_date_text}>{item.date}</Text>
+                                    <Text style={styles.news_line_child_items_list_item_avatar_info_title}>{item?.title}</Text>
+                                    <Text style={styles.news_line_child_items_list_item_avatar_info_text}>{item?.text}</Text>
+                                    <Text style={styles.news_line_child_items_list_item_avatar_info_date_text}>
+                                        {getTime(item.date)}
+                                    </Text>
+
+
+
                                 </View>
 
 
                             </TouchableOpacity>
-                        )
 
-                    })}
+                        )}
+
+                        keyExtractor={(item, index) => index.toString()}
+                        onEndReached={() => loadMoreNews()}
+                        onEndReachedThreshold={0.5}
+                        // keyExtractor={item => item.id}
+                    />
+
+                    {loading_news &&
+                    <View style={{
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        alignSelf: 'center',
+                        width: '100%',
+                        height: 40,
+                        position: 'absolute',
+                        bottom: 60
+                    }}>
+                        <ActivityIndicator size="large" color="#3C6954"/>
+                    </View>
+                    }
                 </View>
 
-            </ScrollView>
+            </View>
 
             <Footer active_page={'newsline'} navigation={props.navigation}/>
 

@@ -6,8 +6,6 @@ import { useColorScheme } from 'react-native';
 import {AuthContext} from "../../AuthContext/context";
 import { useContext } from 'react';
 import Footer from '../../includes/Footer';
-
-
 import BackCoursesIcon from  '../../../../assets/svg/backCoursesIcon';
 
 
@@ -148,6 +146,8 @@ function Courses (props) {
                 </TouchableOpacity>
                 <Text style={styles.courses_header_title}>Курс</Text>
             </View>
+
+
 
             <ScrollView style={styles.courses_wrapper}>
                     <Text style={styles.courses_wrapper_child_title}>Домашний кондитер</Text>

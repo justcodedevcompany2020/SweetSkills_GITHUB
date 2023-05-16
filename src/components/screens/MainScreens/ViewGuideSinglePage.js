@@ -7,8 +7,8 @@ import {AuthContext} from "../../AuthContext/context";
 import { useContext } from 'react';
 import Footer from '../../includes/Footer';
 import ReadMore from '@fawazahmed/react-native-read-more'
-
 import BackCoursesIcon from  '../../../../assets/svg/backCoursesIcon';
+import { Vimeo } from 'react-native-vimeo-iframe';
 
 
 import {
@@ -42,11 +42,6 @@ const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 function ViewGuide (props) {
-
-
-
-
-
 
     const context = useContext(AuthContext);
 
@@ -219,7 +214,13 @@ function ViewGuide (props) {
 
                                     {item.type == 'video' &&
                                         <View style={styles.view_guide_child_items_list_item_img}>
-                                            <Image source={require('../../../../assets/images/video_img2.png')} style={styles.view_guide_child_items_list_item_img_child}/>
+                                            <Vimeo
+                                                videoId={item.option1}
+                                                autoplay={true}
+                                                style={{width: '100%', height: 300}}
+                                                resizeMode="contain"
+                                            />
+
                                         </View>
 
                                     }
@@ -328,8 +329,11 @@ const styles = StyleSheet.create({
 
     view_guide_child_items_list_item_img: {
         width: '100%',
-        height: 192,
+        height: 300,
         marginBottom: 12,
+        flex: 1,
+        resizeMode: 'contain',
+        alignSelf: 'center'
     },
     view_guide_child_items_list_item_img_child: {
         width: '100%',
