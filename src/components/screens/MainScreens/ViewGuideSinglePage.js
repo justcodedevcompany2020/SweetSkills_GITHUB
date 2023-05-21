@@ -9,6 +9,8 @@ import Footer from '../../includes/Footer';
 import ReadMore from '@fawazahmed/react-native-read-more'
 import BackCoursesIcon from  '../../../../assets/svg/backCoursesIcon';
 import { Vimeo } from 'react-native-vimeo-iframe';
+import Video from 'react-native-video';
+import { WebView } from 'react-native-webview';
 
 
 import {
@@ -18,6 +20,7 @@ import {
     View,
     StyleSheet,
     TouchableOpacity,
+    TouchableHighlight,
     Image,
     TextInput,
     ActivityIndicator,
@@ -37,6 +40,7 @@ import {
 } from 'react-native-safe-area-context';
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import CloseIcon from "../../../../assets/svg/close_icon";
+import VideoPlayer from 'react-native-video-player';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -47,12 +51,17 @@ function ViewGuide (props) {
 
     const [guides, setGuides] = useState([]);
     const [denied_guides_popup, setDeniedGuidesPopup] = useState(false);
+    const [activeVimeoId, setActiveVimeoId] = useState( null);
+    const [activeVideoId, setActiveVideoId] = useState( null);
 
 
 
     const redirectToTrainingScreen = () => {
         props.navigation.navigate('MyTrainingScreen')
     }
+
+
+
 
     useEffect(() => {
 
@@ -197,7 +206,16 @@ function ViewGuide (props) {
             </View>
 
 
-            <ScrollView style={styles.view_guide_wrapper}>
+
+
+            <ScrollView
+                style={styles.view_guide_wrapper}
+                overScrollMode="never"
+                removeClippedSubviews={true}
+            >
+
+
+
                 <View style={styles.view_guide_wrapper_child_items_list_wrapper}>
                     {guides.map((item, index) => {
                         return(
@@ -214,15 +232,105 @@ function ViewGuide (props) {
 
                                     {item.type == 'video' &&
                                         <View style={styles.view_guide_child_items_list_item_img}>
-                                            <Vimeo
-                                                videoId={item.option1}
-                                                autoplay={true}
-                                                style={{width: '100%', height: 300}}
-                                                resizeMode="contain"
-                                            />
+                                            <TouchableOpacity
+                                                onPress={() => {
+                                                    setActiveVimeoId(null)
+                                                    setTimeout(() => {
+                                                        setActiveVimeoId(item.option1)
+                                                    }, 0)
+                                                }}
+                                                style={{
+                                                    width: '100%', height: 300, backgroundColor: 'black'
+                                                }}
+                                            >
+                                                {item.option1.length > 0 && activeVimeoId == item.option1 ?
+
+                                                    <TouchableHighlight
+                                                        style={{
+                                                            width: '100%', height: 300,
+                                                        }}
+                                                    >
+                                                        <Vimeo
+                                                            // source={{ uri: `https://player.vimeo.com/video/${item.option1}` }}
+                                                            videoId={activeVimeoId}
+                                                            style={{width: '100%', height: 300, backgroundColor: 'black'}}
+                                                            resizeMode="contain"
+                                                            autoplay='1'
+                                                        />
+                                                    </TouchableHighlight>
+
+                                                    :
+
+
+                                                    <View
+                                                        style={{
+                                                            width: '100%', height: 300,
+                                                        }}
+                                                    >
+                                                      <Image style={{width: '100%', height: '100%', resizeMode: 'cover'}} source={require('../../../../assets/images/recommendations_img2.png')}/>
+                                                    </View>
+
+                                                }
+
+                                            </TouchableOpacity>
 
                                         </View>
 
+                                    }
+
+                                    {item.type == 'video2' &&
+                                        <View
+                                            style={{ width: '100%', height: 300, position: 'relative' }}
+                                        >
+
+                                            <TouchableOpacity
+                                                onPress={() => {
+                                                    setActiveVimeoId(null)
+                                                    setTimeout(() => {
+                                                        setActiveVideoId(item.option1)
+                                                    }, 0)
+                                                }}
+                                                style={{
+                                                    width: '100%', height: 300, backgroundColor: 'black'
+                                                }}
+                                            >
+                                                {item.option1.length > 0 && activeVideoId == item.option1 ?
+
+                                                    <TouchableHighlight
+                                                        style={{
+                                                            width: '100%', height: 300,
+                                                        }}
+                                                    >
+                                                        <WebView
+                                                            source={{ uri: activeVideoId }}
+                                                            allowsFullscreenVideo={true}
+                                                            javaScriptEnabled={true}
+                                                            androidHardwareAccelerationDisabled={true}
+                                                            // mediaPlaybackRequiresUserAction={true}
+                                                            // originWhitelist={'http://*'}
+                                                            style={{
+                                                                width: '100%',
+                                                                height: 300
+                                                            }}
+                                                        />
+                                                    </TouchableHighlight>
+
+                                                    :
+
+
+                                                    <View
+                                                        style={{
+                                                            width: '100%', height: 300,
+                                                        }}
+                                                    >
+                                                        <Image style={{width: '100%', height: '100%', resizeMode: 'cover'}} source={require('../../../../assets/images/recommendations_img2.png')}/>
+                                                    </View>
+
+                                                }
+
+                                            </TouchableOpacity>
+
+                                        </View>
                                     }
 
                                     {item.type == 'text' &&

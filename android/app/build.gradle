@@ -113,9 +113,9 @@ android {
     signingConfigs {
      release {
           storeFile file('sweetskills.keystore')
-          storePassword '111111'
+          storePassword '123456'
           keyAlias 'sweetskills'
-          keyPassword '111111'
+          keyPassword '123456'
         }
         debug {
             storeFile file('debug.keystore')
