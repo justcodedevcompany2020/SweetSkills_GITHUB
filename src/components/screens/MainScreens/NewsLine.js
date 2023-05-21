@@ -317,7 +317,9 @@ const styles = StyleSheet.create({
     news_line_child_items_list_item_avatar: {
         width: 32,
         height: 32,
-        marginRight: 12
+        marginRight: 12,
+        borderRadius: 100,
+        overflow: 'hidden',
     },
     news_line_child_items_list_item_avatar_child: {
         width: '100%',

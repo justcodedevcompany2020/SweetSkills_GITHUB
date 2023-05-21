@@ -2,7 +2,7 @@ import * as React from 'react';
 import {useRef, useState, useEffect} from 'react';
 import Svg, { Mask, Path, Rect, Circle, Defs, Stop, ClipPath, G } from "react-native-svg";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useColorScheme } from 'react-native';
+import { useColorScheme} from 'react-native';
 import {AuthContext} from "../../AuthContext/context";
 import { useContext } from 'react';
 import Footer from '../../includes/Footer';
@@ -22,7 +22,9 @@ import {
     ActivityIndicator,
     ImageBackground,
     ScrollView,
-    Platform
+    Platform,
+    Linking,
+    Pressable,
 } from 'react-native';
 
 import {
@@ -33,6 +35,7 @@ import {
     initialWindowMetrics,
 } from 'react-native-safe-area-context';
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
+import AccountLinkIcon from '../../../../assets/svg/accountLinkIcon';
 
 function Recommendations (props) {
 
@@ -94,6 +97,9 @@ function Recommendations (props) {
         }
     }
 
+    const handlePress = (link) => {
+        Linking.openURL(link);
+    };
     return (
         <SafeAreaView style={[styles.container]}>
                 <View style={styles.recommendations_header}>
@@ -117,14 +123,15 @@ function Recommendations (props) {
                                                     <Text style={styles.recommendation_list_item_title} numberOfLines={2}>{item.title}</Text>
                                                     <Text style={styles.recommendation_list_item_info} numberOfLines={3}>{item.description}</Text>
                                                     <View style={styles.recommendation_list_item_price_wrapper}>
-                                                        <Text style={styles.recommendation_list_item_price}>{item.price}</Text>
+                                                        <Text style={styles.recommendation_list_item_price}>{item.price} ₽</Text>
                                                         {item.old_price != item.price &&
-                                                         <Text style={styles.recommendation_list_item_discounted_price}>{item.old_price}</Text>
+                                                         <Text style={styles.recommendation_list_item_discounted_price}>{item.old_price} ₽</Text>
                                                         }
                                                     </View>
-                                                    <TouchableOpacity style={styles.recommendation_list_item_buy_btn}>
+                                                    <Pressable style={styles.recommendation_list_item_buy_btn} title={item.link} onPress={ () => handlePress(item.link)}>
                                                         <Text style={styles.recommendation_list_item_buy_btn_text}>Купить</Text>
-                                                    </TouchableOpacity>
+
+                                                    </Pressable>
                                                 </View>
                                             )
 
@@ -150,14 +157,15 @@ function Recommendations (props) {
                                                     <Text style={styles.recommendation_list_item_title} numberOfLines={2}>{item.title}</Text>
                                                     <Text style={styles.recommendation_list_item_info} numberOfLines={3}>{item.description}</Text>
                                                     <View style={styles.recommendation_list_item_price_wrapper}>
-                                                        <Text style={styles.recommendation_list_item_price}>{item.price}</Text>
+                                                        <Text style={styles.recommendation_list_item_price}>{item.price} ₽</Text>
                                                         {item.old_price != item.price &&
-                                                             <Text style={styles.recommendation_list_item_discounted_price}>{item.old_price}</Text>
+                                                             <Text style={styles.recommendation_list_item_discounted_price}>{item.old_price} ₽</Text>
                                                         }
                                                     </View>
-                                                    <TouchableOpacity style={styles.recommendation_list_item_buy_btn}>
+                                                    <Pressable style={styles.recommendation_list_item_buy_btn} title={item.link} onPress={ () => handlePress(item.link)}>
                                                         <Text style={styles.recommendation_list_item_buy_btn_text}>Купить</Text>
-                                                    </TouchableOpacity>
+
+                                                    </Pressable>
                                                 </View>
                                             )
 
